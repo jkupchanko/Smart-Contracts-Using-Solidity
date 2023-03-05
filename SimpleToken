@@ -1,0 +1,39 @@
+pragma solidity >=0.8.2 <0.9.0;
+
+// Rules 
+// Only the creater can create a new coin
+// Anyone can send coins to each other without needing username or password - all you will need is a ETH keypair
+
+contract Coin {
+
+    //Public make the varibles accessible from other contracts
+    address public minter;
+    mapping(address => uint) public balances;
+    event Sent(address from, address to, uint amount);
+
+    // Constructor only runs when we deploy the contract
+    constructor () {
+        minter = msg.sender;
+    }
+    // Make new coins and send to an address and only the sender can send the coins.
+    function mint (address receiver, uint amount) public {
+        require(msg.sender == minter);
+        balances[receiver] += amount;
+    }
+
+    // Send any amount of coin that to an exsiting address 
+
+    error insufficientBalance(uint requested, uint available);
+
+    function send(address receiver, uint amount) public{
+        // require the amount of ... then run this
+        if(amount > balances[msg.sender])
+        revert insufficientBalance({
+            requested: amount,
+            available: balances[msg.sender]
+        });        
+        balances[msg.sender] -= amount;
+        balances[receiver] += amount;
+        emit Sent(msg.sender,receiver,amount);
+    }
+}
